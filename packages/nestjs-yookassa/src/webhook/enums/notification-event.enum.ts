@@ -20,6 +20,5 @@ export enum NotificationEventEnum {
 	/**
 	 * Возврат успешно завершен.
 	 */
-	REFUND_SUCCEEDED = 'refund.succeeded',
+	REFUND_SUCCEEDED = 'refund.succeeded'
 }
-
