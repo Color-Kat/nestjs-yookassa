@@ -1,6 +1,4 @@
-import CidrMatcher from 'cidr-matcher'
-
-const matcher = new CidrMatcher()
+import * as ipaddr from 'ipaddr.js'
 
 /**
  * Проверяет, входит ли IP-адрес в список разрешённых CIDR / IP.
@@ -18,7 +16,16 @@ export function isIpAllowed(
 	if (!clientIp) return false
 
 	try {
-		return matcher.match(clientIp, whitelist as string[])
+		const ip = ipaddr.parse(clientIp)
+
+		return whitelist.some(rule => {
+			if (rule.includes('/')) {
+				const [range, prefix] = ipaddr.parseCIDR(rule)
+				return ip.match(range, prefix)
+			}
+
+			return ip.toString() === ipaddr.parse(rule).toString()
+		})
 	} catch {
 		return false
 	}

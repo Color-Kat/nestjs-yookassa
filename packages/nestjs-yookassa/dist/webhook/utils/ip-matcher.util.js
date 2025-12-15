@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isIpAllowed = isIpAllowed;
-const cidr_matcher_1 = require("cidr-matcher");
-const matcher = new cidr_matcher_1.default();
+const ipaddr = require("ipaddr.js");
 /**
  * Проверяет, входит ли IP-адрес в список разрешённых CIDR / IP.
  *
@@ -16,7 +15,14 @@ function isIpAllowed(clientIp, whitelist) {
     if (!clientIp)
         return false;
     try {
-        return matcher.match(clientIp, whitelist);
+        const ip = ipaddr.parse(clientIp);
+        return whitelist.some(rule => {
+            if (rule.includes('/')) {
+                const [range, prefix] = ipaddr.parseCIDR(rule);
+                return ip.match(range, prefix);
+            }
+            return ip.toString() === ipaddr.parse(rule).toString();
+        });
     }
     catch (_a) {
         return false;
